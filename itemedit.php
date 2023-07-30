@@ -4,11 +4,12 @@ $username = "root";
 $password = "";
 $database = "erpsystem_db";
 
-$title = "";
-$fname = "";
-$lname = "";
-$contact = "";
-$district = "";
+$itemcode = "";
+$itemname = "";
+$itemcategory = "";
+$itemsubcategory = "";
+$quantity = "";
+$unitprice = "";
 
 $errorMessage = "";
 $successMessage = "";
@@ -20,34 +21,69 @@ if ($connection->connect_error) {
     die("Connection failed: " . $connection->connect_error);
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $title = $_POST["title"];
-    $fname = $_POST["Fname"];
-    $lname = $_POST["Lname"];
-    $contact = $_POST["Contact"];
-    $district = $_POST["district"];
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    // GET method: Show the data of the customer
+    if (!isset($_GET["id"])) {
+        header("location:/erpsystem/ERP-System-Csquare.Cloud/index.php");
+        exit;
+    }
 
-    if (empty($title) || empty($fname) || empty($lname) || empty($contact) || empty($district)) {
-        $errorMessage = "Fill All Fields!";
-    } else {
-        $stmt = $connection->prepare("INSERT INTO customer (title, first_name, last_name, contact_no, district) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $title, $fname, $lname, $contact, $district);
+    $id = $_GET["id"];
 
-        if ($stmt->execute()) {
-            $successMessage = "Customer added successfully!";
-            $title = "";
-            $fname = "";
-            $lname = "";
-            $contact = "";
-            $district = "";
-        } else {
-            $errorMessage = "Error: " . $stmt->error;
+    // Read the row of the selected customer from the database table
+    $sql = "SELECT * FROM item WHERE id=?";
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    if (!$row) {
+        header("location:/erpsystem/ERP-System-Csquare.Cloud/itemindex.php");
+        exit;
+    }
+
+    // Populate the form fields with the customer data
+    $itemcode = $row["item_code"];
+    $itemname = $row["item_name"];
+    $itemcategory = $row["item_category"];
+    $itemsubcategory = $row["item_subcategory"];
+    $quantity = $row["quantity"];
+    $unitprice = $row["unit_price"];
+} else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // POST method: Update the customer data
+    $itemcode = $_POST["itemcode"];
+    $itemname = $_POST["itemname"];
+    $itemcategory = $_POST["itemcategory"];
+    $itemsubcategory = $_POST["itemsubcategory"];
+    $quantity = $_POST["quantity"];
+    $unitprice = $_POST["unitprice"];
+
+    do {
+        if (empty($itemcode) || empty($itemname) || empty($itemcategory) || empty($itemsubcategory) || empty($quantity) || empty($unitprice)) {
+            $errorMessage = "Fill All Fields!";
+            break;
         }
 
-        $stmt->close();
-    }
+        $id = $_GET["id"];
+
+        $sql = "UPDATE item SET item_code=?, item_name=?, item_category=?, item_subcategory=?, quantity=?, unit_price=? WHERE id=?";
+        $stmt = $connection->prepare($sql);
+        $stmt->bind_param("sssssii", $itemcode, $itemname, $itemcategory, $itemsubcategory, $quantity, $unitprice, $id);
+        $result = $stmt->execute();
+        if (!$result) {
+            $errorMessage = "Invalid query: " . $stmt->error;
+            break;
+        }
+
+        $successMessage = "Item updated successfully!";
+        header("location:/erpsystem/ERP-System-Csquare.Cloud/itemindex.php");
+        exit;
+
+    } while (false);
 }
 
+// Close the database connection
 $connection->close();
 ?>
 
@@ -91,8 +127,8 @@ $connection->close();
             </div>
         </div>
     </nav>
-    <div class="container my-5">
-        <h2>New Customer</h2>
+<div class="container my-5">
+        <h2>Edit Item</h2>
 
         <?php
         if (!empty($errorMessage)) {
@@ -107,39 +143,39 @@ $connection->close();
 
         <form method="post">
             <div class="row mb-3">
-                <label class="col-sm-3 col-form-label">Title</label>
+                <label class="col-sm-3 col-form-label">Item Code</label>
                 <div class="col-sm-6">
-                <select class="form-select" name="title">
-            <option value="Mr." <?php if ($title === 'Mr.') echo 'selected'; ?>>Mr</option>
-            <option value="Mrs." <?php if ($title === 'Mrs.') echo 'selected'; ?>>Mrs</option>
-            <option value="Ms." <?php if ($title === 'Miss.') echo 'selected'; ?>>Ms</option>
-            <option value="Ms." <?php if ($title === 'Miss.') echo 'selected'; ?>>Dr</option>
-            
-        </select>
+                    <input type="text" class="form-control" name="itemcode" value="<?php echo $itemcode; ?>">
                 </div>
             </div>
             <div class="row mb-3">
-                <label class="col-sm-3 col-form-label">First Name</label>
+                <label class="col-sm-3 col-form-label">Item Name</label>
                 <div class="col-sm-6">
-                    <input type="text" class="form-control" name="Fname" value="<?php echo $fname; ?>">
+                    <input type="text" class="form-control" name="itemname" value="<?php echo $itemname; ?>">
                 </div>
             </div>
             <div class="row mb-3">
-                <label class="col-sm-3 col-form-label">Last Name</label>
+                <label class="col-sm-3 col-form-label">Item Category</label>
                 <div class="col-sm-6">
-                    <input type="text" class="form-control" name="Lname" value="<?php echo $lname; ?>">
+                    <input type="text" class="form-control" name="itemcategory" value="<?php echo $itemcategory; ?>">
                 </div>
             </div>
             <div class="row mb-3">
-                <label class="col-sm-3 col-form-label">Contact Number</label>
+                <label class="col-sm-3 col-form-label">Item Subcategory</label>
                 <div class="col-sm-6">
-                    <input type="text" class="form-control" name="Contact" value="<?php echo $contact; ?>">
+                    <input type="text" class="form-control" name="itemsubcategory" value="<?php echo  $itemsubcategory; ?>">
                 </div>
             </div>
             <div class="row mb-3">
-                <label class="col-sm-3 col-form-label">District</label>
+                <label class="col-sm-3 col-form-label">Quantity</label>
                 <div class="col-sm-6">
-                    <input type="text" class="form-control" name="district" value="<?php echo $district; ?>">
+                    <input type="text" class="form-control" name="quantity" value="<?php echo  $quantity; ?>">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-3 col-form-label">Unit Price</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" name="unitprice" value="<?php echo $unitprice; ?>">
                 </div>
             </div>
 
@@ -163,7 +199,7 @@ $connection->close();
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
                 <div class="col-sm-3 d-grid">
-                    <a class="btn btn-outline-primary" href="/erp-system-csquare.cloud/index.php" role="button">Cancel</a>
+                    <a class="btn btn-outline-primary" href="/erpsystem/ERP-System-Csquare.Cloud/itemindex.php" role="button">Cancel</a>
                 </div>
             </div>
         </form>

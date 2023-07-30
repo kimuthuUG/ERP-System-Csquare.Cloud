@@ -10,7 +10,7 @@
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">ERP-SYSTEM</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
@@ -42,10 +42,10 @@
     </nav>
 
     <div class="container my-5">
-        <h2>List of Customers</h2>
+        <h2>List of Items</h2>
         <br>
         <br>
-        <a class="btn btn-primary" href="/erpsystem/ERP-System-Csquare.Cloud/create.php" role="button">New Customer</a>
+        <a class="btn btn-primary" href="/erpsystem/ERP-System-Csquare.Cloud/itemcreate.php" role="button">New Items</a>
         <br>
         <br>
         <br>
@@ -53,12 +53,12 @@
             <!-- Table content goes here -->
             <thead>
                 <th>ID</th>
-                <th>Title</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Contact number</th>
-                <th>District</th>
-                <th>Actions</th>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th>Item Category</th>
+                <th>Item Subcategory</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
             </thead>
             <tbody>
                 <?php
@@ -76,7 +76,7 @@
                 }
 
                 // Read all rows from the database table
-                $sql = "SELECT * FROM customer";
+                $sql = "SELECT * FROM item";
                 $result = $connection->query($sql);
 
                 if (!$result) {
@@ -87,15 +87,16 @@
                 while ($row = $result->fetch_assoc()) {
                     echo "<tr>";
                     echo "<td>" . $row['id'] . "</td>";
-                    echo "<td>" . $row['title'] . "</td>";
-                    echo "<td>" . $row['first_name'] . "</td>";
-                    echo "<td>" . $row['last_name'] . "</td>";
-                    echo "<td>" . $row['contact_no'] . "</td>";
-                    echo "<td>" . $row['district'] . "</td>";
+                    echo "<td>" . $row['item_code'] . "</td>";
+                    echo "<td>" . $row['item_name'] . "</td>";
+                    echo "<td>" . $row['item_category'] . "</td>";
+                    echo "<td>" . $row['item_subcategory'] . "</td>";
+                    echo "<td>" . $row['quantity'] . "</td>";
+                    echo "<td>" . $row['unit_price'] . "</td>";
                     echo "<td>
-                            <a class='btn btn-primary btn-sm' href='/erpsystem/ERP-System-Csquare.Cloud/edit.php?id=$row[id]' >EDIT</a>
+                            <a class='btn btn-primary btn-sm' href='/erpsystem/ERP-System-Csquare.Cloud/itemedit.php?id=$row[id]' >EDIT</a>
 
-                            <a class='btn btn-primary btn-sm' href='/erpsystem/ERP-System-Csquare.Cloud/delete.php?id=$row[id]'>DELETE</a>
+                            <a class='btn btn-primary btn-sm' href='/erpsystem/ERP-System-Csquare.Cloud/itemdelete.php?id=$row[id]'>DELETE</a>
                           </td>";
                     echo "</tr>";
                 }
@@ -106,7 +107,7 @@
         </table>
         <br>
         <br>
-        
+       
     </div>
 
 
